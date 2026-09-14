@@ -82,7 +82,7 @@ class StudentAssessmentView(ViewSet):
                 )
 
             serializer = AssessmentSerializer(assmt)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.data(), status=status.HTTP_201_CREATED)
 
         else:
             student_assessment = StudentAssessment()
@@ -97,7 +97,7 @@ class StudentAssessmentView(ViewSet):
                 with transaction.atomic():
                     student_assessment.save()
                     serializer = StudentAssessmentSerializer(student_assessment)
-                    return Response(serializer.data, status=status.HTTP_201_CREATED)
+                    return Response(serializer.data(), status=status.HTTP_201_CREATED)
             except Exception as ex:
                 log.info("Ya done goofed.")
                 return Response({"reason": ex.args[0]}, status=status.HTTP_400_BAD_REQUEST)
@@ -110,7 +110,7 @@ class StudentAssessmentView(ViewSet):
 
             try:
                 serializer = StudentAssessmentSerializer(student_assessments, many=True)
-                return Response(serializer.data, status=status.HTTP_200_OK)
+                return Response(serializer.data(), status=status.HTTP_200_OK)
             except Exception as ex:
                 return Response({"reason": ex.args[0]}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -127,7 +127,7 @@ class StudentAssessmentView(ViewSet):
 
             if request.auth.user.id == assessment.student.user.id or request.auth.user.is_staff:
                 serializer = StudentAssessmentSerializer(assessment)
-                return Response(serializer.data, status=status.HTTP_200_OK)
+                return Response(serializer.data(), status=status.HTTP_200_OK)
             else:
                 return Response(
                     {"message": "You are not authorized to view this student profile."},
