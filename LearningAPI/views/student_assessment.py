@@ -2,6 +2,7 @@
 import os
 import requests
 
+from django.db import transaction
 from django.http import HttpResponseServerError
 from django.utils.decorators import method_decorator
 
@@ -86,9 +87,10 @@ class StudentAssessmentView(ViewSet):
             student_assessment.status = StudentAssessmentStatus.objects.get(status="In Progress")
 
             try:
-                student_assessment.save()
-                serializer = StudentAssessmentSerializer(student_assessment)
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+                with transaction.atomic():
+                    student_assessment.save()
+                    serializer = StudentAssessmentSerializer(student_assessment)
+                    return Response(serializer.data, status=status.HTTP_201_CREATED)
             except Exception as ex:
                 return Response({"reason": ex.args[0]}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -170,7 +172,6 @@ class StudentAssessmentSerializer(serializers.ModelSerializer):
     assessment = AssessmentSerializer(many=False)
     status = serializers.SerializerMethodField()
     instructor_username = serializers.SerializerMethodField() 
-
     def get_status(self, obj):
         """Return the status of assessment"""
         return obj.status.status
