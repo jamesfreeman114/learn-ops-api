@@ -1,6 +1,7 @@
 """Assessment view module"""
 import os
 import requests
+import structlog
 
 from django.db import transaction
 from django.http import HttpResponseServerError
@@ -17,6 +18,7 @@ from LearningAPI.models.people import (Assessment, NssUser, StudentAssessment,
 from LearningAPI.models.coursework import Book
 from LearningAPI.models.skill import AssessmentWeight, LearningWeight
 
+log = structlog.get_logger(__name__)
 
 class StudentAssessmentPermission(permissions.BasePermission):
     """Custom permissions for Assessment view"""
@@ -60,6 +62,8 @@ class StudentAssessmentView(ViewSet):
             book_id is not None and\
             request.auth.user.is_staff:
 
+            log.info("if block executed")
+
             assmt = Assessment()
             assmt.name = request.data["name"]
             assmt.source_url = request.data["sourceURL"]
@@ -86,12 +90,16 @@ class StudentAssessmentView(ViewSet):
             student_assessment.assessment = Assessment.objects.get(pk=request.data["assessmentId"])
             student_assessment.status = StudentAssessmentStatus.objects.get(status="In Progress")
 
+            log.info("else block executed")
+            log.info("StudentAssessmentView student_assessment %s", student_assessment )
+
             try:
                 with transaction.atomic():
                     student_assessment.save()
                     serializer = StudentAssessmentSerializer(student_assessment)
                     return Response(serializer.data, status=status.HTTP_201_CREATED)
             except Exception as ex:
+                log.info("Ya done goofed.")
                 return Response({"reason": ex.args[0]}, status=status.HTTP_400_BAD_REQUEST)
 
     def list(self, request):
