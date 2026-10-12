@@ -86,9 +86,9 @@ class StudentViewSet(ModelViewSet):
             if request.auth.user == student.user or request.auth.user.is_staff:
                 if "slack_handle" in request.data:
                     student.slack_handle = request.data["slack_handle"]
+                    student.save()
                 if "gitub_handle" in request.data:
                     student.gitub_handle = request.data["gitub_handle"]
-
                 return Response(None, status=status.HTTP_204_NO_CONTENT)
             else:
                 return Response(None, status=status.HTTP_401_UNAUTHORIZED)
