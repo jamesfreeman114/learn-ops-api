@@ -31,7 +31,8 @@ class StudentProjectForm(forms.ModelForm):
         # Adjust 'project__book__course__active=True' to match your model's relationships
         projects = Project.objects.filter(book__course__active=True)
         self.fields['project'].queryset = projects
-        project_choices = [(project.id, f"{project.book.course.name} - {project.name}") for project in projects]
+        project_choices = [(project.id, f"{project.book.course.name} - {project.name}")
+                           for project in projects]
         self.fields['project'].choices = project_choices
 
 class StudentAssessmentForm(forms.ModelForm):
